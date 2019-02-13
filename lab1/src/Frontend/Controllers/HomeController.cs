@@ -33,11 +33,10 @@ namespace Frontend.Controllers
         private async Task<string> GetResponse(string data)
         {
             string url = "http://localhost:5000/api/values";
-            HttpContent content = new StringContent(data);
             HttpClient client = new HttpClient();
-            HttpResponseMessage response = await client.PostAsync(url, content);
-            string result = await response.Content.ReadAsStringAsync();
-            return result;
+            HttpResponseMessage response = await client.PostAsJsonAsync(url, data);
+            response.EnsureSuccessStatusCode();
+            return response.Content.ReadAsStringAsync().Result;
         }
 
         public IActionResult Error()
