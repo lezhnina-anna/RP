@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Concurrent;
 using StackExchange.Redis;
+using System.Threading;
 
 namespace Backend.Controllers
 {
@@ -18,8 +19,18 @@ namespace Backend.Controllers
         [HttpGet("{id}")]
         public string Get(string id)
         {
-            string value = null;
-            _data.TryGetValue(id, out value);
+            string value = "null";
+            IDatabase db = redis.GetDatabase();
+            const int maxTries = 5;
+            var key = "RANK_" + id;
+            for (var i = 0; i < maxTries; i++) {
+                if (db.KeyExists(key) && db.KeyExists(id)) {
+                    value = db.StringGet(key) + "_" + db.StringGet(id);
+                    break;
+                }
+                else
+                    Thread.Sleep(500);
+            }
             return value;
         }
 
@@ -31,8 +42,8 @@ namespace Backend.Controllers
             IDatabase db = redis.GetDatabase();
             db.StringSet(id, value);
             var pub = redis.GetSubscriber();
-            pub.Publish("TextCreated", id);
-            RedisValue res = db.StringGet(id);
+            string message = "TEXT_CREATED:" + id;
+            pub.Publish("event", message);
             _data[id] = value;
             return id;
         }
