@@ -1,0 +1,4 @@
+backendPort:5000 
+frontendPort:5001 
+counter:3 
+rater:2 

@@ -14,7 +14,7 @@ namespace Backend.Controllers
     {
         static readonly ConcurrentDictionary<string, string> _data = new ConcurrentDictionary<string, string>();
         static private ConnectionMultiplexer redis = ConnectionMultiplexer.Connect("localhost");
-        
+
         // GET api/values/<id>
         [HttpGet("{id}")]
         public string Get(string id)
@@ -23,8 +23,10 @@ namespace Backend.Controllers
             IDatabase db = redis.GetDatabase();
             const int maxTries = 5;
             var key = "RANK_" + id;
-            for (var i = 0; i < maxTries; i++) {
-                if (db.KeyExists(key) && db.KeyExists(id)) {
+            for (var i = 0; i < maxTries; i++)
+            {
+                if (db.KeyExists(key) && db.KeyExists(id))
+                {
                     value = db.StringGet(key) + "_" + db.StringGet(id);
                     break;
                 }
